@@ -1,0 +1,18 @@
+# CQ1: Which movies have the highest average rating among movies
+#      that received at least 8 ratings?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?title ?year (COUNT(?rating) AS ?ratings) (ROUND(AVG(?value) * 100) / 100 AS ?avgRating)
+WHERE {
+  ?rating a mlo:Rating ;
+          mlo:concernsMovie ?movie ;
+          mlo:ratingValue ?value .
+  ?movie mlo:title ?title ;
+         mlo:releaseYear ?year .
+}
+GROUP BY ?movie ?title ?year
+HAVING (COUNT(?rating) >= 8)
+ORDER BY DESC(?avgRating) DESC(?ratings)
+LIMIT 10

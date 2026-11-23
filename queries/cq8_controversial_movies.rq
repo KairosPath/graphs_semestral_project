@@ -1,0 +1,23 @@
+# CQ8: Which movies divide users' opinions the most?  Controversy is
+#      measured by the variance of a movie's ratings.  SPARQL 1.1 has no
+#      VARIANCE/STDDEV aggregate, so it is computed as AVG(x^2) - AVG(x)^2
+#      (ranking by variance gives the same order as by standard deviation).
+#      Only movies with at least 6 ratings are considered.
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?title (COUNT(?r) AS ?ratings)
+       (MIN(?v) AS ?lowest) (MAX(?v) AS ?highest)
+       (ROUND(AVG(?v) * 100) / 100 AS ?avgRating)
+       (ROUND((AVG(?v * ?v) - AVG(?v) * AVG(?v)) * 100) / 100 AS ?variance)
+WHERE {
+  ?r a mlo:Rating ;
+     mlo:concernsMovie ?movie ;
+     mlo:ratingValue ?v .
+  ?movie mlo:title ?title .
+}
+GROUP BY ?movie ?title
+HAVING (COUNT(?r) >= 6)
+ORDER BY DESC(?variance)
+LIMIT 8

@@ -1,0 +1,26 @@
+movieId,title,genres
+32,Twelve Monkeys (a.k.a. 12 Monkeys) (1995),Mystery|Sci-Fi|Thriller
+110,Braveheart (1995),Action|Drama|War
+260,Star Wars: Episode IV - A New Hope (1977),Action|Adventure|Sci-Fi
+293,Léon: The Professional (a.k.a. The Professional) (Léon) (1994),Action|Crime|Drama|Thriller
+296,Pulp Fiction (1994),Comedy|Crime|Drama|Thriller
+356,Forrest Gump (1994),Comedy|Drama|Romance|War
+541,Blade Runner (1982),Action|Sci-Fi|Thriller
+589,Terminator 2: Judgment Day (1991),Action|Sci-Fi
+924,2001: A Space Odyssey (1968),Adventure|Drama|Sci-Fi
+1089,Reservoir Dogs (1992),Crime|Mystery|Thriller
+1196,Star Wars: Episode V - The Empire Strikes Back (1980),Action|Adventure|Sci-Fi
+1198,Raiders of the Lost Ark (Indiana Jones and the Raiders of the Lost Ark) (1981),Action|Adventure
+1200,Aliens (1986),Action|Adventure|Horror|Sci-Fi
+1240,"Terminator, The (1984)",Action|Sci-Fi|Thriller
+1258,"Shining, The (1980)",Horror
+2762,"Sixth Sense, The (1999)",Drama|Horror|Mystery
+2959,Fight Club (1999),Action|Crime|Drama|Thriller
+3578,Gladiator (2000),Action|Adventure|Drama
+4226,Memento (2000),Mystery|Thriller
+4878,Donnie Darko (2001),Drama|Mystery|Sci-Fi|Thriller
+5989,Catch Me If You Can (2002),Crime|Drama
+7153,"Lord of the Rings: The Return of the King, The (2003)",Action|Adventure|Drama|Fantasy
+7361,Eternal Sunshine of the Spotless Mind (2004),Drama|Romance|Sci-Fi
+48516,"Departed, The (2006)",Crime|Drama|Thriller
+79132,Inception (2010),Action|Crime|Drama|Mystery|Sci-Fi|Thriller|IMAX

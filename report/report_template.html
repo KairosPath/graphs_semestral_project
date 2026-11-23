@@ -1,0 +1,322 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>MovieLens Knowledge Graph – Semestral project</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Source+Sans+3:ital,wght@0,400;0,600;0,700;1,400&family=Source+Code+Pro:wght@400;500&display=swap">
+<style>
+@page {
+  size: A4;
+  margin: 20mm 21mm 22mm 21mm;
+  @bottom-center { content: counter(page); font-family: 'Source Sans 3', Arial, sans-serif; font-size: 9pt; color: #555; }
+}
+@page :first { @bottom-center { content: none; } }
+html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+body { font-family: 'Source Sans 3', Arial, sans-serif; font-size: 10.5pt; line-height: 1.42; color: #1a1a1a; margin: 0; counter-reset: h2; }
+p { margin: 0 0 6pt 0; }
+a { color: #1a1a1a; }
+h1 { font-size: 21pt; font-weight: 700; margin: 0 0 4pt 0; letter-spacing: -0.2pt; }
+.meta { font-size: 10.5pt; color: #444; margin: 0 0 2pt 0; }
+.titleblock { border-bottom: 0.8pt solid #1a1a1a; padding-bottom: 10pt; margin-bottom: 14pt; }
+h2 { font-size: 13pt; font-weight: 700; margin: 16pt 0 6pt 0; break-after: avoid; counter-increment: h2; counter-reset: h3; }
+h2::before { content: counter(h2) "  "; }
+h3 { font-size: 10.5pt; font-weight: 700; margin: 11pt 0 3pt 0; break-after: avoid; counter-increment: h3; }
+h3::before { content: counter(h2) "." counter(h3) "  "; }
+h3.q::before { content: none; }
+ul, ol { margin: 0 0 6pt 0; padding-left: 16pt; }
+li { margin: 0 0 1.5pt 0; }
+code { font-family: 'Source Code Pro', Consolas, monospace; font-size: 9pt; }
+pre { font-family: 'Source Code Pro', Consolas, monospace; font-size: 7.9pt; line-height: 1.32; margin: 3pt 0 7pt 0; padding: 2pt 0 2pt 9pt; border-left: 1.6pt solid #b5b5b5; white-space: pre-wrap; break-inside: avoid; color: #111; }
+table { border-collapse: collapse; width: 100%; font-size: 9.3pt; line-height: 1.3; margin: 4pt 0 9pt 0; break-inside: avoid; }
+th { text-align: left; font-weight: 600; padding: 3pt 6pt 3pt 0; border-top: 0.8pt solid #1a1a1a; border-bottom: 0.5pt solid #1a1a1a; }
+td { padding: 2.2pt 6pt 2.2pt 0; vertical-align: top; }
+tr:last-child td { border-bottom: 0.8pt solid #1a1a1a; }
+td code, th code { font-size: 8.6pt; }
+.num { text-align: right; }
+figure { margin: 6pt 0 10pt 0; break-inside: avoid; }
+figure svg { width: 100%; height: auto; display: block; }
+figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
+.tcap { margin: 6pt 0 0 0; }
+.small { font-size: 9.3pt; color: #444; }
+.keep { break-inside: avoid; }
+</style>
+</head>
+<body>
+
+<div class="titleblock">
+<h1>MovieLens Knowledge Graph</h1>
+<p class="meta">Semestral project, 4IZ444 Graph-based and relational data, winter semester 2026</p>
+<p class="meta">Rostislav, Vojta Pardubský · December 2026</p>
+</div>
+
+<h2>Domain and use case</h2>
+<p>We picked movies because there is a well-known open dataset for them, MovieLens, and because anyone can tell whether the answers make sense. The small version of MovieLens (<a href="https://grouplens.org/datasets/movielens/latest/">ml-latest-small</a>, we used the <a href="https://github.com/smanihwr/ml-latest-small">GitHub copy</a>) has 9,742 movies, 610 users, 100,836 ratings and 3,683 tags in four CSV files: movies, ratings, tags and links to IMDb.</p>
+<p>The CSV files are separate tables. To find out which directors make the movies a user likes, you have to join several of them, and the director is not in the data at all. Our idea was to put everything into one graph and add the missing facts (directors, countries, languages) from Wikidata.</p>
+<p>The graph could be used by a film club that wants to know what its members like, by someone building a simple recommender, or by anyone who wants to explore the data with SPARQL. Our main use case is the recommender: for a given user, suggest movies they have not seen yet.</p>
+
+<h2>Competency questions</h2>
+<p>We wrote the questions first and designed the ontology around them.</p>
+<ol>
+<li>Which movies have the best average rating (only movies with at least 8 ratings)?</li>
+<li>What is the average rating of each genre?</li>
+<li>Which movies share user tags with <i>Inception</i>?</li>
+<li>Which movies should a given user watch next, based on the genres they like?</li>
+<li>Which directors have more than one movie in the graph, and how are their movies rated?</li>
+<li>Which movies were made by more than one country?</li>
+<li>Which directors have more than one citizenship?</li>
+<li>Which movies split opinions the most?</li>
+</ol>
+<p>Questions 1, 2, 5 and 8 are analytical (averages, counts, variance). Question 4 is our main use case.</p>
+
+<h2>Ontology</h2>
+<p>The ontology (<code>ontology/movielens-ontology.ttl</code>, prefix <code>mlo:</code> = <code>http://example.org/movielens/ontology#</code>) has 11 classes and 20 properties, 9 object and 11 datatype properties.</p>
+<p>The most important decision was how to model a rating. A rating is not just a link from a user to a movie, it also has a value and a time. So it is a separate node of class <code>Rating</code>. A tag works the same way: a <code>TagAssignment</code> says which user put which tag on which movie and when. Both are subclasses of <code>UserActivity</code>. <code>Movie</code> is in the middle of the model and the facts from Wikidata are attached to it (figure 1).</p>
+
+<figure>
+<svg viewBox="0 58 760 712" xmlns="http://www.w3.org/2000/svg" font-family="'Source Sans 3', Arial, sans-serif" font-size="13" role="img" aria-label="Class diagram of the ontology">
+<defs><marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" fill="#333"/></marker></defs>
+<g fill="none" stroke="#333" stroke-width="1.2">
+<path d="M302 100H184" marker-end="url(#ar)"/><path d="M462 100H630V290" marker-end="url(#ar)"/><path d="M216 228H164" marker-end="url(#ar)"/>
+<path d="M540 330H99V500" marker-end="url(#ar)"/><path d="M540 370H283V500" marker-end="url(#ar)"/><path d="M540 410H467V500" marker-end="url(#ar)"/>
+<path d="M651 426V500" marker-end="url(#ar)"/><path d="M566 656H283V572" marker-end="url(#ar)"/>
+<path d="M291 208V170H474V200"/><path d="M382 170V140"/><polygon points="382,128 374,140 390,140" fill="#fff"/>
+<path d="M651 572V608"/><polygon points="651,620 643,608 659,608" fill="#fff"/>
+</g>
+<g font-size="11.5" fill="#444">
+<text x="243" y="92" text-anchor="middle">performedBy</text><text x="546" y="92" text-anchor="middle">concernsMovie</text>
+<text x="190" y="220" text-anchor="middle">usesTag</text><text x="320" y="322" text-anchor="middle">hasGenre</text>
+<text x="411" y="362" text-anchor="middle">countryOfOrigin</text><text x="459" y="462" text-anchor="end">originalLanguage</text>
+<text x="643" y="466" text-anchor="end">directedBy</text><text x="643" y="481" text-anchor="end">(inverse: directed)</text>
+<text x="425" y="648" text-anchor="middle">citizenOf</text>
+</g>
+<g fill="#fff" stroke="#333" stroke-width="1.2">
+<rect x="24" y="72" width="160" height="56"/><rect x="302" y="72" width="160" height="56" stroke-dasharray="5 4"/>
+<rect x="24" y="200" width="140" height="56"/><rect x="216" y="208" width="150" height="40"/><rect x="394" y="200" width="160" height="56"/>
+<rect x="540" y="290" width="180" height="136" fill="#eeeeee" stroke="#111" stroke-width="1.8"/>
+<rect x="24" y="500" width="150" height="56"/><rect x="208" y="500" width="150" height="72"/><rect x="392" y="500" width="150" height="72"/>
+<rect x="566" y="500" width="170" height="72"/><rect x="566" y="620" width="170" height="72"/>
+</g>
+<g fill="#111" font-weight="600" text-anchor="middle">
+<text x="104" y="96">User</text><text x="382" y="96">UserActivity</text><text x="94" y="224">Tag</text><text x="291" y="232">TagAssignment</text>
+<text x="474" y="224">Rating</text><text x="630" y="314">Movie</text><text x="99" y="524">Genre</text><text x="283" y="524">Country</text>
+<text x="467" y="524">Language</text><text x="651" y="524">Director</text><text x="651" y="644">Person</text>
+</g>
+<g font-size="11.5" fill="#444">
+<text x="36" y="112">movieLensId : integer</text><text x="314" y="112">createdAt : dateTime</text><text x="36" y="240">tagLabel : string</text>
+<text x="406" y="240">ratingValue : decimal</text>
+<text x="552" y="336" fill="#111">title : string</text><text x="552" y="352" fill="#111">releaseYear : integer</text><text x="552" y="368" fill="#111">runtimeMinutes : integer</text>
+<text x="552" y="384" fill="#111">imdbId : string (key)</text><text x="552" y="400" fill="#111">movieLensId : integer</text>
+<text x="36" y="540">rdfs:label</text><text x="220" y="540">isoCode : string</text><text x="220" y="556">rdfs:label</text>
+<text x="404" y="540">isoCode : string</text><text x="404" y="556">rdfs:label</text>
+<text x="578" y="540">≡ Person ⊓</text><text x="578" y="556">∃directed.Movie</text>
+<text x="578" y="660">name : string</text><text x="578" y="676">birthDate : date</text>
+</g>
+<g font-size="11.5" fill="#444">
+<path d="M24 724H60" stroke="#333" stroke-width="1.2" marker-end="url(#ar)"/><text x="68" y="728">object property</text>
+<path d="M200 724H228" stroke="#333" stroke-width="1.2"/><polygon points="240,724 228,716 228,732" fill="#fff" stroke="#333" stroke-width="1.2"/><text x="248" y="728">subclass of</text>
+<rect x="340" y="716" width="24" height="16" fill="none" stroke="#333" stroke-width="1.2" stroke-dasharray="5 4"/><text x="372" y="728">abstract class (only Rating or TagAssignment)</text>
+<text x="24" y="756">Datatype properties are written inside the boxes. Movie, Person, Country and Language are linked to Wikidata with owl:sameAs.</text>
+</g>
+</svg>
+<figcaption>Figure 1: Classes and properties of the ontology</figcaption>
+</figure>
+
+<div class="keep"><p class="tcap">Table 1: Classes</p>
+<table>
+<tr><th style="width:24%">Class</th><th style="width:20%">Subclass of</th><th>What it is</th></tr>
+<tr><td><code>Movie</code></td><td></td><td>a movie from MovieLens</td></tr>
+<tr><td><code>Genre</code></td><td></td><td>one of the MovieLens genres (Drama, Sci-Fi, …)</td></tr>
+<tr><td><code>Tag</code></td><td></td><td>a keyword users give to movies, in lower case</td></tr>
+<tr><td><code>Country</code>, <code>Language</code></td><td></td><td>country of origin or citizenship; original language of a movie</td></tr>
+<tr><td><code>User</code></td><td></td><td>an anonymous MovieLens account</td></tr>
+<tr><td><code>Person</code></td><td></td><td>a real person, in our data only directors</td></tr>
+<tr><td><code>Director</code></td><td><code>Person</code></td><td>a person who directed at least one movie</td></tr>
+<tr><td><code>UserActivity</code></td><td></td><td>something a user did with a movie at some time (abstract)</td></tr>
+<tr><td><code>Rating</code></td><td><code>UserActivity</code></td><td>a rating from 0.5 to 5 stars</td></tr>
+<tr><td><code>TagAssignment</code></td><td><code>UserActivity</code></td><td>a user putting a tag on a movie</td></tr>
+</table></div>
+
+<div class="keep"><p class="tcap">Table 2: Properties</p>
+<table>
+<tr><th style="width:24%">Property</th><th style="width:38%">From → to</th><th>Note</th></tr>
+<tr><td><code>hasGenre</code></td><td>Movie → Genre</td><td></td></tr>
+<tr><td><code>directedBy</code> / <code>directed</code></td><td>Movie → Director / Person → Movie</td><td>inverse pair, only <code>directedBy</code> is stored</td></tr>
+<tr><td><code>countryOfOrigin</code></td><td>Movie → Country</td><td></td></tr>
+<tr><td><code>originalLanguage</code></td><td>Movie → Language</td><td></td></tr>
+<tr><td><code>citizenOf</code></td><td>Person → Country</td><td></td></tr>
+<tr><td><code>performedBy</code></td><td>UserActivity → User</td><td>functional</td></tr>
+<tr><td><code>concernsMovie</code></td><td>UserActivity → Movie</td><td>functional</td></tr>
+<tr><td><code>usesTag</code></td><td>TagAssignment → Tag</td><td>functional</td></tr>
+<tr><td><code>title</code>, <code>releaseYear</code>, <code>runtimeMinutes</code>, <code>imdbId</code></td><td>Movie → string / integer</td><td>functional, <code>imdbId</code> is a key</td></tr>
+<tr><td><code>movieLensId</code></td><td>Movie or User → integer</td><td>functional</td></tr>
+<tr><td><code>ratingValue</code></td><td>Rating → decimal</td><td>functional</td></tr>
+<tr><td><code>createdAt</code></td><td>UserActivity → dateTime</td><td>functional</td></tr>
+<tr><td><code>tagLabel</code></td><td>Tag → string</td><td>functional</td></tr>
+<tr><td><code>name</code>, <code>birthDate</code></td><td>Person → string / date</td><td></td></tr>
+<tr><td><code>isoCode</code></td><td>Country or Language → string</td><td>functional</td></tr>
+</table></div>
+
+<h3>Axioms</h3>
+<p>All properties have a domain and a range. On top of that the ontology says:</p>
+<ul>
+<li><code>Director</code> is a subclass of <code>Person</code> and is defined as a person who directed at least one movie (<code>owl:equivalentClass</code> with <code>Person ⊓ ∃directed.Movie</code>).</li>
+<li><code>UserActivity</code> is a disjoint union of <code>Rating</code> and <code>TagAssignment</code>. We also added <code>owl:disjointWith</code> between the two, because the OWL RL reasoner we used ignores <code>owl:disjointUnionOf</code>.</li>
+<li>The top classes (Movie, Genre, Tag, Country, Language, User, Person, UserActivity) are pairwise disjoint. For example a user account is not a person.</li>
+<li><code>directed</code> is the inverse of <code>directedBy</code>, <code>imdbId</code> is a key of <code>Movie</code> and the properties marked in table 2 are functional.</li>
+<li>Every movie has some genre, every rating has exactly one value and every tag assignment exactly one tag.</li>
+</ul>
+<p>We loaded the ontology together with the data into the OWL RL reasoner <code>owlrl</code> (Python). It found no inconsistency. To check that it really looks for errors, we also gave it something that is both a <code>Rating</code> and a <code>TagAssignment</code>, and it reported it.</p>
+
+<h3>Reuse of existing vocabularies</h3>
+<p>We searched <a href="https://lov.linkeddata.es/dataset/lov/terms?q=Movie">Linked Open Vocabularies</a> for movie, film, director, rating, genre and tagging. The most useful results were schema.org (<code>Movie</code>, <code>Person</code>, <code>director</code>, <code>genre</code>, <code>Rating</code>), FOAF, Dublin Core, SKOS, the DBpedia ontology (<code>dbo:Film</code>, <code>dbo:director</code>) and the Tag Ontology / MUTO for tagging.</p>
+<p>In the end we kept our own terms and connected them to these vocabularies with <code>rdfs:subClassOf</code> and <code>rdfs:subPropertyOf</code> (table 3). The main reason is that schema.org only says on which classes a property is expected (<code>schema:domainIncludes</code>). It has no real domains and ranges, so a reasoner cannot use them, and adding our own domains to schema.org terms would change their meaning for everybody else. There were smaller problems too. <code>schema:Rating</code> is meant for reviews, not for a user clicking stars at some moment. <code>schema:duration</code> is a text like <code>PT2H28M</code>, but we wanted the runtime as a number of minutes. DBpedia terms did not fit because our extra data comes from Wikidata. Thanks to the links, a tool that knows schema.org or FOAF still understands our data. Every movie, director, country and language also has <code>owl:sameAs</code> to its Wikidata entity.</p>
+<div class="keep"><p class="tcap">Table 3: Links to existing vocabularies</p>
+<table>
+<tr><th style="width:40%">Our term</th><th>Subclass / subproperty of</th></tr>
+<tr><td><code>Movie</code>, <code>Rating</code>, <code>Country</code>, <code>Language</code></td><td><code>schema:Movie</code>, <code>schema:Rating</code>, <code>schema:Country</code>, <code>schema:Language</code></td></tr>
+<tr><td><code>Person</code></td><td><code>schema:Person</code>, <code>foaf:Person</code></td></tr>
+<tr><td><code>User</code></td><td><code>foaf:OnlineAccount</code></td></tr>
+<tr><td><code>Genre</code>, <code>Tag</code></td><td><code>skos:Concept</code></td></tr>
+<tr><td><code>directedBy</code>, <code>hasGenre</code>, <code>ratingValue</code>, <code>birthDate</code></td><td><code>schema:director</code>, <code>schema:genre</code>, <code>schema:ratingValue</code>, <code>schema:birthDate</code></td></tr>
+<tr><td><code>countryOfOrigin</code>, <code>originalLanguage</code></td><td><code>schema:countryOfOrigin</code>, <code>schema:inLanguage</code></td></tr>
+<tr><td><code>title</code>, <code>createdAt</code></td><td><code>dcterms:title</code>, <code>dcterms:created</code></td></tr>
+<tr><td><code>name</code>, <code>tagLabel</code></td><td><code>foaf:name</code> and <code>schema:name</code>, <code>skos:prefLabel</code></td></tr>
+</table></div>
+
+<h2>Data</h2>
+<p>All data is real, nothing is generated. The whole MovieLens dataset would give far too many triples, so a Python script (<code>scripts/select_subset.py</code>) takes a small part of it:</p>
+<ul>
+<li>the 25 most rated movies that have at least 50 ratings and at least 8 tags,</li>
+<li>10 users who rated between 7 and 14 of these movies, plus the 3 users who tagged them most,</li>
+<li>all ratings and tags of these users on these movies, at most 4 tags per movie.</li>
+</ul>
+<p>We chose users with a medium number of ratings on purpose. Someone who rated all 25 movies would leave nothing to recommend.</p>
+<p>Then one SPARQL query to Wikidata (<code>scripts/fetch_wikidata.py</code>) finds every movie by its IMDb ID and returns the director with birth date and citizenship, the countries of origin, the original languages and the runtime. All 25 movies were found. The last script (<code>scripts/build_rdf.py</code>) cleans the data and writes Turtle. For example "Terminator, The (1984)" becomes the title "The Terminator" and the year 1984, genres are split, tags are lower-cased and Unix timestamps become <code>xsd:dateTime</code>.</p>
+<p>The result, <code>data/movielens-data.ttl</code>, has 1,718 triples: 25 movies, 13 genres, 13 users, 148 ratings, 73 tag assignments with 35 different tags, 18 directors, 10 countries and 3 languages. Our first version had 40 movies and almost 3,700 triples. That was more than we needed, so we made it smaller and removed things that no query used. A short example:</p>
+<pre>mlr:movie-79132 a mlo:Movie ;
+    mlo:title "Inception" ;
+    mlo:releaseYear 2010 ;
+    mlo:hasGenre mlr:genre-sci-fi, mlr:genre-thriller ;   # and 5 more
+    mlo:directedBy mlr:person-Q25191 ;
+    mlo:countryOfOrigin mlr:country-gb, mlr:country-us ;
+    owl:sameAs wd:Q25188 .
+
+mlr:rating-567-79132 a mlo:Rating ;
+    mlo:performedBy mlr:user-567 ;
+    mlo:concernsMovie mlr:movie-79132 ;
+    mlo:ratingValue 3.0 ;
+    mlo:createdAt "2018-05-02T18:56:16+00:00"^^xsd:dateTime .</pre>
+
+<h2>SPARQL queries</h2>
+<p>All queries are in the <code>queries</code> folder. We ran them in Apache Jena 6.2, the engine behind Fuseki, and saved the full results in <code>queries/results</code>. The prefixes are the same everywhere, so we leave them out below:</p>
+<pre>PREFIX mlo:  &lt;http://example.org/movielens/ontology#&gt;
+PREFIX mlr:  &lt;http://example.org/movielens/resource/&gt;
+PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;</pre>
+
+<h3 class="q">CQ1: Best rated movies</h3>
+{{q:cq1_top_rated_movies}}
+<p>Six movies have at least 8 ratings. <i>Star Wars: Episode IV</i> is first with 4.30, then <i>Pulp Fiction</i> and <i>Forrest Gump</i> (both 4.20), <i>The Empire Strikes Back</i> (4.13), <i>The Sixth Sense</i> (4.11) and <i>Raiders of the Lost Ark</i> (3.94). Without the <code>HAVING</code> condition, movies with only three or four ratings could end up on top.</p>
+
+<h3 class="q">CQ2: Average rating per genre</h3>
+{{q:cq2_avg_rating_per_genre}}
+<p>We get all 13 genres. Most of them are between 3.9 and 4.2, so the genre alone does not say much. Comedy is the best (4.20 from 20 ratings). Fantasy (3.43) and IMAX (3.58) are the worst, but each of them is only one movie.</p>
+
+<h3 class="q">CQ3: Movies with the same tags as Inception</h3>
+{{q:cq3_movies_sharing_tags}}
+<p>Eleven movies share at least one tag with <i>Inception</i>. <i>Aliens</i>, <i>Fight Club</i> and <i>The Terminator</i> share two tags each (action and sci-fi, or thought-provoking and action), the others share one.</p>
+
+<h3 class="q">CQ4: What should user 57 watch next (use case)</h3>
+{{q:cq4_genre_recommendation}}
+<p>The query first finds the user's favourite genres, which we define as genres they rated at least three times with an average of 4 or more. Then it takes movies in these genres that the user has not rated and sorts them by the number of matching genres and by the average rating of all users. User 57 rated 14 movies and likes Adventure (4.50), Sci-Fi (4.38), Action (4.33), Drama (4.17) and Thriller (4.00). The first five suggestions:</p>
+<table style="width:85%">
+<tr><th>Movie</th><th class="num">Matching genres</th><th class="num">Avg rating</th></tr>
+<tr><td>Inception</td><td class="num">4</td><td class="num">3.58</td></tr>
+<tr><td>Léon: The Professional</td><td class="num">3</td><td class="num">4.50</td></tr>
+<tr><td>Fight Club</td><td class="num">3</td><td class="num">4.42</td></tr>
+<tr><td>Donnie Darko</td><td class="num">3</td><td class="num">4.20</td></tr>
+<tr><td>The Lord of the Rings: The Return of the King</td><td class="num">3</td><td class="num">3.43</td></tr>
+</table>
+
+<h3 class="q">CQ5: Directors with more than one movie</h3>
+{{q:cq5_directors_multiple_movies}}
+<p>Six directors. Ridley Scott (<i>Blade Runner</i>, <i>Gladiator</i>) has the best average, 4.22, followed by Quentin Tarantino (4.17) and Stanley Kubrick (4.00). James Cameron is the only one with three movies (<i>The Terminator</i>, <i>Terminator 2</i>, <i>Aliens</i>), but with the lowest average, 3.60.</p>
+
+<h3 class="q">CQ6: Movies made by more than one country</h3>
+{{q:cq6_coproductions}}
+<p>10 of the 25 movies have two countries of origin, and one of them is always the United States. The second one is most often the United Kingdom (5 movies, e.g. <i>2001: A Space Odyssey</i> and <i>Inception</i>), then Hong Kong (<i>Blade Runner</i>, <i>The Departed</i>), France, Germany and New Zealand.</p>
+
+<h3 class="q">CQ7: Directors with more than one citizenship</h3>
+{{q:cq7_multi_citizenship_directors}}
+<p>Seven of the 18 directors have two citizenships, for example Stanley Kubrick (US and UK), Martin Scorsese (US and Italy) and Christopher Nolan (UK and US). James Cameron has Canada and New Zealand. This question and CQ5 only work because of Wikidata, MovieLens itself knows nothing about directors.</p>
+
+<h3 class="q">CQ8: Movies that split opinions</h3>
+{{q:cq8_controversial_movies}}
+<p>SPARQL has no function for variance, so we compute it as the average of squares minus the square of the average. <i>The Empire Strikes Back</i> splits users the most: its ratings go from 2.0 to 5.0 (variance 1.05), although the average is 4.13. <i>A New Hope</i> is second. So even the most popular movies have people who do not like them.</p>
+
+<h3 class="q">A1: Franchises (string functions)</h3>
+{{q:a1_franchises}}
+<p>The franchise name is the part of the title before the colon, without "The" at the start and without a sequel number at the end. We get two franchises: <i>Star Wars</i> (2 movies, 4.22) and <i>Terminator</i> (2 movies, 3.59).</p>
+
+<h3 class="q">A2: Descriptive tags used on several movies</h3>
+{{q:a2_tag_vocabulary}}
+<p>The filter keeps longer or multi-word tags, so one-word genre names like "action" are skipped. Nine tags are used on two or more movies. "atmospheric" is the most common (8 movies, 3 users), then "sci-fi" (7) and "dreamlike", "suspense" and "thought-provoking" (4 each).</p>
+
+<h3 class="q">A3: Strict and generous users</h3>
+{{q:a3_user_strictness}}
+<p>For every rating we take the difference between the user's score and the movie's average, and then average it per user. User 567 is the strictest, 1.07 stars below average. User 261 is the most generous, 0.75 stars above. A better recommender would have to correct for this.</p>
+
+<h2>SHACL validation</h2>
+<p>OWL works with the open world assumption. If a movie has no title, OWL does not see a problem, the title is just unknown. If a functional property has two values, OWL concludes that they are the same thing instead of reporting an error. And some rules cannot be written in our ontology at all, for example that a rating must be a half star. That is what SHACL is for. We wrote four shapes (<code>shacl/movielens-shapes.ttl</code>). Below they are shortened, without datatypes and error messages.</p>
+
+<p><b>MovieShape</b> checks that a movie record is complete: one non-empty title, a year between 1888 and 2026, an IMDb ID in the right format, at least one genre and one director, and a runtime of at least 40 minutes. The ontology only says that some genre exists, it never complains when it is missing.</p>
+<pre>mls:MovieShape a sh:NodeShape ; sh:targetClass mlo:Movie ;
+  sh:property [ sh:path mlo:title ; sh:minCount 1 ; sh:maxCount 1 ; sh:minLength 1 ] ,
+              [ sh:path mlo:releaseYear ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:minInclusive 1888 ; sh:maxInclusive 2026 ] ,
+              [ sh:path mlo:imdbId ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:pattern "^tt[0-9]{7,8}$" ] ,
+              [ sh:path mlo:hasGenre ; sh:minCount 1 ; sh:class mlo:Genre ] ,
+              [ sh:path mlo:directedBy ; sh:minCount 1 ; sh:class mlo:Director ] ,
+              [ sh:path mlo:runtimeMinutes ; sh:maxCount 1 ; sh:minInclusive 40 ] .</pre>
+
+<p><b>RatingShape</b> requires exactly one user, movie, time and value, and the value must be one of 0.5, 1.0, …, 5.0. The ontology only says the value is a decimal, so 4.2 or 17 would be fine for OWL. A SPARQL constraint also checks that the rating was not given before the movie came out, which compares two different nodes.</p>
+<pre>mls:RatingShape a sh:NodeShape ; sh:targetClass mlo:Rating ;
+  sh:property [ sh:path mlo:ratingValue ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:in ( 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 ) ] ,
+              [ sh:path mlo:performedBy ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:class mlo:User ] ,
+              [ sh:path mlo:concernsMovie ; sh:minCount 1 ; sh:maxCount 1 ;
+                sh:class mlo:Movie ] ,
+              [ sh:path mlo:createdAt ; sh:minCount 1 ; sh:maxCount 1 ] ;
+  sh:sparql [ sh:select """SELECT $this WHERE {
+      $this mlo:createdAt ?when ; mlo:concernsMovie/mlo:releaseYear ?year .
+      FILTER (YEAR(?when) &lt; ?year) }""" ] .</pre>
+
+<p><b>OneRatingPerMovieShape</b> makes sure a user rates each movie only once. In OWL two rating nodes for the same user and movie are perfectly fine, and OWL cannot count them.</p>
+<pre>mls:OneRatingPerMovieShape a sh:NodeShape ; sh:targetClass mlo:User ;
+  sh:sparql [ sh:select """SELECT $this ?movie WHERE {
+      ?r a mlo:Rating ; mlo:performedBy $this ; mlo:concernsMovie ?movie . }
+    GROUP BY $this ?movie HAVING (COUNT(DISTINCT ?r) &gt; 1)""" ] .</pre>
+
+<p><b>DirectorShape</b> requires exactly one name, at most one birth date and at least one movie (through the inverse path of <code>directedBy</code>, because <code>directed</code> is not stored). The SPARQL constraint checks that the director was at least 15 when the movie came out.</p>
+<pre>mls:DirectorShape a sh:NodeShape ; sh:targetClass mlo:Director ;
+  sh:property [ sh:path mlo:name ; sh:minCount 1 ; sh:maxCount 1 ] ,
+              [ sh:path mlo:birthDate ; sh:maxCount 1 ] ,
+              [ sh:path mlo:citizenOf ; sh:class mlo:Country ] ,
+              [ sh:path [ sh:inversePath mlo:directedBy ] ;
+                sh:minCount 1 ; sh:class mlo:Movie ] ;
+  sh:sparql [ sh:select """SELECT $this WHERE {
+      $this mlo:birthDate ?birth .
+      ?movie mlo:directedBy $this ; mlo:releaseYear ?year .
+      FILTER (?year - YEAR(?birth) &lt; 15) }""" ] .</pre>
+
+<p>Our data passes all four shapes, in Apache Jena and in pySHACL. To test the shapes we made a file with broken records (<code>shacl/test-invalid-data.ttl</code>): a movie without title, genre and director, with the year 1850 and a wrong IMDb ID; a rating of 4.2 without a user, given to <i>Inception</i> in 2005; a second rating of <i>Twelve Monkeys</i> by user 57; and a director without a name, born in 2001, who directed <i>Forrest Gump</i> (1994). SHACL found 11 errors. The OWL reasoner found none in the same data, which shows nicely that the two tools do different jobs.</p>
+
+<h2>Conclusion</h2>
+<p>The graph answers all eight questions. The best decision was to model ratings as separate nodes, and linking to Wikidata saved us a lot of work: one query gave us all directors and countries. We also learned that OWL and SHACL do not replace each other. The reasoner checks the logic, SHACL checks the data.</p>
+<p>The graph is small, so the averages are based on only 3 to 10 ratings per movie and should not be taken too seriously. We used the Wikidata facts as they are, without checking them. The recommendation is very simple and does not correct for strict or generous users (A3).</p>
+<p>Vojta chose the dataset and came up with the first questions (CQ1 to CQ4). Rostislav built the ontology, the scripts and the SHACL shapes. The other queries, the report and the presentation we did together. Next time we would decide on the size of the data at the beginning, because we had to rebuild the graph once.</p>
+<p class="small">Submitted files: <code>ontology/movielens-ontology.ttl</code>, <code>data/movielens-data.ttl</code>, <code>queries/*.rq</code> with results, <code>shacl/movielens-shapes.ttl</code> with test data and reports, <code>scripts/</code> and <code>README.md</code>.</p>
+
+</body>
+</html>

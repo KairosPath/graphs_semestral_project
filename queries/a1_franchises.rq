@@ -1,0 +1,22 @@
+# A1 (string operations): Which franchises / series appear in the graph?
+#      The franchise name is derived from the title: the part before ":"
+#      (if any), without a leading "The " and a trailing sequel number
+#      ("Terminator 2: Judgment Day" and "The Terminator" -> "Terminator").
+#      For each franchise: number of movies, first/last year, average rating.
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?franchise (COUNT(DISTINCT ?movie) AS ?movies)
+       (MIN(?year) AS ?firstYear) (MAX(?year) AS ?lastYear)
+       (ROUND(AVG(?value) * 100) / 100 AS ?avgRating)
+WHERE {
+  ?movie mlo:title ?title ;
+         mlo:releaseYear ?year .
+  ?r a mlo:Rating ; mlo:concernsMovie ?movie ; mlo:ratingValue ?value .
+  BIND (IF(CONTAINS(?title, ":"), STRBEFORE(?title, ":"), ?title) AS ?base)
+  BIND (REPLACE(REPLACE(?base, "^The ", ""), " [0-9]+$", "") AS ?franchise)
+}
+GROUP BY ?franchise
+HAVING (COUNT(DISTINCT ?movie) > 1)
+ORDER BY DESC(?movies) ?franchise

@@ -1,0 +1,39 @@
+# CQ4: Which movies has a given user (user 57) not rated yet that belong to
+#      the user's favourite genres?  A favourite genre = a genre the user
+#      rated at least 3 times with an average of at least 4 stars.
+#      Candidates are ranked by the number of matching favourite genres and
+#      by the community average rating.
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?title (COUNT(DISTINCT ?favGenre) AS ?matchingGenres)
+       (GROUP_CONCAT(DISTINCT ?genreLabel; separator=", ") AS ?viaGenres)
+       ?communityAvg
+WHERE {
+  # 1) the user's favourite genres
+  {
+    SELECT ?user ?favGenre WHERE {
+      VALUES ?user { mlr:user-57 }
+      ?r a mlo:Rating ; mlo:performedBy ?user ; mlo:concernsMovie ?m ; mlo:ratingValue ?v .
+      ?m mlo:hasGenre ?favGenre .
+    }
+    GROUP BY ?user ?favGenre
+    HAVING (COUNT(?r) >= 3 && AVG(?v) >= 4.0)
+  }
+  # 2) movies in those genres ...
+  ?candidate mlo:hasGenre ?favGenre ;
+             mlo:title ?title .
+  ?favGenre rdfs:label ?genreLabel .
+  # 3) ... that the user has not rated yet
+  FILTER NOT EXISTS { ?x a mlo:Rating ; mlo:performedBy ?user ; mlo:concernsMovie ?candidate . }
+  # 4) community average used for ranking
+  {
+    SELECT ?candidate (ROUND(AVG(?cv) * 100) / 100 AS ?communityAvg) WHERE {
+      ?cr a mlo:Rating ; mlo:concernsMovie ?candidate ; mlo:ratingValue ?cv .
+    } GROUP BY ?candidate
+  }
+}
+GROUP BY ?candidate ?title ?communityAvg
+ORDER BY DESC(?matchingGenres) DESC(?communityAvg)
+LIMIT 10

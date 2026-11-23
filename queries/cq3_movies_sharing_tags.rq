@@ -1,0 +1,18 @@
+# CQ3: Which movies share user tags with "Inception", and which tags
+#      do they have in common?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?otherTitle (COUNT(DISTINCT ?tag) AS ?sharedTags)
+       (GROUP_CONCAT(DISTINCT ?label; separator=", ") AS ?tags)
+WHERE {
+  ?movie mlo:title "Inception" .
+  ?a1 mlo:concernsMovie ?movie ; mlo:usesTag ?tag .
+  ?a2 mlo:concernsMovie ?other ; mlo:usesTag ?tag .
+  ?tag mlo:tagLabel ?label .
+  ?other mlo:title ?otherTitle .
+  FILTER (?other != ?movie)
+}
+GROUP BY ?other ?otherTitle
+ORDER BY DESC(?sharedTags) ?otherTitle

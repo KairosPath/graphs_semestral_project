@@ -1,0 +1,17 @@
+# CQ5: Which directors have more than one movie in the knowledge graph,
+#      and how well are their movies rated on average?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?director (COUNT(DISTINCT ?movie) AS ?movies)
+       (GROUP_CONCAT(DISTINCT ?title; separator=" | ") AS ?titles)
+       (ROUND(AVG(?value) * 100) / 100 AS ?avgRating)
+WHERE {
+  ?movie mlo:directedBy ?d ; mlo:title ?title .
+  ?d mlo:name ?director .
+  ?r a mlo:Rating ; mlo:concernsMovie ?movie ; mlo:ratingValue ?value .
+}
+GROUP BY ?d ?director
+HAVING (COUNT(DISTINCT ?movie) > 1)
+ORDER BY DESC(?avgRating)

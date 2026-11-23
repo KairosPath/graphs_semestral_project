@@ -1,0 +1,17 @@
+# CQ6: Which movies are international co-productions (more than one
+#      country of origin), and which countries took part?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?title ?year (COUNT(DISTINCT ?c) AS ?countries)
+       (GROUP_CONCAT(DISTINCT ?country; separator=", ") AS ?countryList)
+WHERE {
+  ?movie mlo:title ?title ;
+         mlo:releaseYear ?year ;
+         mlo:countryOfOrigin ?c .
+  ?c rdfs:label ?country .
+}
+GROUP BY ?movie ?title ?year
+HAVING (COUNT(DISTINCT ?c) > 1)
+ORDER BY ?year

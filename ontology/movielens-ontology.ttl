@@ -1,0 +1,240 @@
+@prefix mlo:     <http://example.org/movielens/ontology#> .
+@prefix owl:     <http://www.w3.org/2002/07/owl#> .
+@prefix rdf:     <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs:    <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix xsd:     <http://www.w3.org/2001/XMLSchema#> .
+@prefix dcterms: <http://purl.org/dc/terms/> .
+@prefix foaf:    <http://xmlns.com/foaf/0.1/> .
+@prefix schema:  <https://schema.org/> .
+@prefix skos:    <http://www.w3.org/2004/02/skos/core#> .
+
+# =============================================================================
+#  MovieLens Knowledge Graph Ontology
+# =============================================================================
+
+<http://example.org/movielens/ontology>
+    a owl:Ontology ;
+    rdfs:label "MovieLens Knowledge Graph Ontology"@en ;
+    dcterms:title "MovieLens Knowledge Graph Ontology"@en ;
+    dcterms:description """Ontology for a movie knowledge graph built from the MovieLens
+ml-latest-small dataset (movies, genres, users, ratings, tags) enriched with
+facts from Wikidata (directors, countries of origin, original languages)."""@en ;
+    dcterms:created "2026-11-21"^^xsd:date ;
+    dcterms:source <https://grouplens.org/datasets/movielens/latest/> , <https://www.wikidata.org/> ;
+    owl:versionInfo "1.0" .
+
+# =============================================================================
+#  Classes
+# =============================================================================
+
+mlo:Movie a owl:Class ;
+    rdfs:label "Movie"@en ;
+    rdfs:comment "A feature film catalogued in MovieLens."@en ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty mlo:hasGenre ;
+                      owl:someValuesFrom mlo:Genre ] ;
+    owl:hasKey ( mlo:imdbId ) .
+
+mlo:Genre a owl:Class ;
+    rdfs:label "Genre"@en ;
+    rdfs:comment "A genre from the fixed MovieLens genre list (e.g. Drama, Sci-Fi)."@en .
+
+mlo:Tag a owl:Class ;
+    rdfs:label "Tag"@en ;
+    rdfs:comment "A free-text keyword that users attach to movies (normalised to lower case)."@en .
+
+mlo:Country a owl:Class ;
+    rdfs:label "Country"@en ;
+    rdfs:comment "A country, used as a movie's country of origin or a person's citizenship."@en .
+
+mlo:Language a owl:Class ;
+    rdfs:label "Language"@en ;
+    rdfs:comment "A natural language in which a movie was originally made."@en .
+
+mlo:User a owl:Class ;
+    rdfs:label "User"@en ;
+    rdfs:comment "An anonymised MovieLens user account that rates and tags movies."@en .
+
+mlo:Person a owl:Class ;
+    rdfs:label "Person"@en ;
+    rdfs:comment "A real person involved in film-making."@en .
+
+mlo:Director a owl:Class ;
+    rdfs:label "Director"@en ;
+    rdfs:comment "A person who directed at least one movie."@en ;
+    rdfs:subClassOf mlo:Person ;
+    owl:equivalentClass [ a owl:Class ;
+        owl:intersectionOf ( mlo:Person
+                             [ a owl:Restriction ;
+                               owl:onProperty mlo:directed ;
+                               owl:someValuesFrom mlo:Movie ] ) ] .
+
+mlo:UserActivity a owl:Class ;
+    rdfs:label "User activity"@en ;
+    rdfs:comment "An interaction of one user with one movie at a given time. Every activity is either a rating or a tag assignment."@en ;
+    owl:disjointUnionOf ( mlo:Rating mlo:TagAssignment ) .
+
+mlo:Rating a owl:Class ;
+    rdfs:label "Rating"@en ;
+    rdfs:comment "A star rating (0.5 - 5.0) given by a user to a movie."@en ;
+    rdfs:subClassOf mlo:UserActivity ;
+    owl:disjointWith mlo:TagAssignment ;   # explicit, also implied by the disjoint union
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty mlo:ratingValue ;
+                      owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+mlo:TagAssignment a owl:Class ;
+    rdfs:label "Tag assignment"@en ;
+    rdfs:comment "The act of a user attaching a tag to a movie."@en ;
+    rdfs:subClassOf mlo:UserActivity ;
+    rdfs:subClassOf [ a owl:Restriction ;
+                      owl:onProperty mlo:usesTag ;
+                      owl:cardinality "1"^^xsd:nonNegativeInteger ] .
+
+# Top-level classes are pairwise disjoint (Director and Rating/TagAssignment
+# are covered through their superclasses).
+[] a owl:AllDisjointClasses ;
+   owl:members ( mlo:Movie mlo:Genre mlo:Tag mlo:Country mlo:Language
+                 mlo:User mlo:Person mlo:UserActivity ) .
+
+# =============================================================================
+#  Object properties
+# =============================================================================
+
+mlo:hasGenre a owl:ObjectProperty ;
+    rdfs:label "has genre"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range mlo:Genre .
+
+mlo:directedBy a owl:ObjectProperty ;
+    rdfs:label "directed by"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range mlo:Director ;
+    owl:inverseOf mlo:directed .
+
+mlo:directed a owl:ObjectProperty ;
+    rdfs:label "directed"@en ;
+    rdfs:domain mlo:Person ;
+    rdfs:range mlo:Movie .
+
+mlo:countryOfOrigin a owl:ObjectProperty ;
+    rdfs:label "country of origin"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range mlo:Country .
+
+mlo:originalLanguage a owl:ObjectProperty ;
+    rdfs:label "original language"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range mlo:Language .
+
+mlo:citizenOf a owl:ObjectProperty ;
+    rdfs:label "citizen of"@en ;
+    rdfs:domain mlo:Person ;
+    rdfs:range mlo:Country .
+
+mlo:performedBy a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "performed by"@en ;
+    rdfs:comment "The user who made the rating or tag assignment."@en ;
+    rdfs:domain mlo:UserActivity ;
+    rdfs:range mlo:User .
+
+mlo:concernsMovie a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "concerns movie"@en ;
+    rdfs:comment "The movie that was rated or tagged."@en ;
+    rdfs:domain mlo:UserActivity ;
+    rdfs:range mlo:Movie .
+
+mlo:usesTag a owl:ObjectProperty , owl:FunctionalProperty ;
+    rdfs:label "uses tag"@en ;
+    rdfs:domain mlo:TagAssignment ;
+    rdfs:range mlo:Tag .
+
+# =============================================================================
+#  Datatype properties
+# =============================================================================
+
+mlo:title a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "title"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range xsd:string .
+
+mlo:releaseYear a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "release year"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range xsd:integer .
+
+mlo:runtimeMinutes a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "runtime in minutes"@en ;
+    rdfs:comment "Theatrical running time in minutes (shortest cut listed in Wikidata)."@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range xsd:integer .
+
+mlo:movieLensId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "MovieLens ID"@en ;
+    rdfs:comment "Identifier of a movie or a user in the MovieLens dataset."@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( mlo:Movie mlo:User ) ] ;
+    rdfs:range xsd:integer .
+
+mlo:imdbId a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "IMDb ID"@en ;
+    rdfs:domain mlo:Movie ;
+    rdfs:range xsd:string .
+
+mlo:ratingValue a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "rating value"@en ;
+    rdfs:comment "Number of stars, from 0.5 to 5.0 in half-star steps."@en ;
+    rdfs:domain mlo:Rating ;
+    rdfs:range xsd:decimal .
+
+mlo:createdAt a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "created at"@en ;
+    rdfs:domain mlo:UserActivity ;
+    rdfs:range xsd:dateTime .
+
+mlo:tagLabel a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "tag label"@en ;
+    rdfs:domain mlo:Tag ;
+    rdfs:range xsd:string .
+
+mlo:name a owl:DatatypeProperty ;
+    rdfs:label "name"@en ;
+    rdfs:domain mlo:Person ;
+    rdfs:range xsd:string .
+
+mlo:birthDate a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "birth date"@en ;
+    rdfs:domain mlo:Person ;
+    rdfs:range xsd:date .
+
+mlo:isoCode a owl:DatatypeProperty , owl:FunctionalProperty ;
+    rdfs:label "ISO code"@en ;
+    rdfs:comment "ISO 3166-1 alpha-2 code of a country or ISO 639-1 code of a language."@en ;
+    rdfs:domain [ a owl:Class ; owl:unionOf ( mlo:Country mlo:Language ) ] ;
+    rdfs:range xsd:string .
+
+# =============================================================================
+#  Alignment with external vocabularies (see report, section "Reuse")
+#  Our terms are declared as sub-classes / sub-properties of well-known terms,
+#  so data stays interpretable by schema.org / FOAF / Dublin Core consumers
+#  while we keep strict domain/range semantics of our own.
+# =============================================================================
+
+mlo:Movie         rdfs:subClassOf schema:Movie .
+mlo:Person        rdfs:subClassOf schema:Person , foaf:Person .
+mlo:User          rdfs:subClassOf foaf:OnlineAccount .
+mlo:Rating        rdfs:subClassOf schema:Rating .
+mlo:Country       rdfs:subClassOf schema:Country .
+mlo:Language      rdfs:subClassOf schema:Language .
+mlo:Genre         rdfs:subClassOf skos:Concept .
+mlo:Tag           rdfs:subClassOf skos:Concept .
+
+mlo:title            rdfs:subPropertyOf dcterms:title .
+mlo:name             rdfs:subPropertyOf foaf:name , schema:name .
+mlo:birthDate        rdfs:subPropertyOf schema:birthDate .
+mlo:hasGenre         rdfs:subPropertyOf schema:genre .
+mlo:directedBy       rdfs:subPropertyOf schema:director .
+mlo:countryOfOrigin  rdfs:subPropertyOf schema:countryOfOrigin .
+mlo:originalLanguage rdfs:subPropertyOf schema:inLanguage .
+mlo:ratingValue      rdfs:subPropertyOf schema:ratingValue .
+mlo:createdAt        rdfs:subPropertyOf dcterms:created .
+mlo:tagLabel         rdfs:subPropertyOf skos:prefLabel .

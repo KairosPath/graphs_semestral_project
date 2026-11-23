@@ -1,0 +1,25 @@
+# A3 (nested aggregation): How strict or generous is each user compared to
+#      the community?  For every rating we take the difference between the
+#      user's score and the movie's average score, then average these
+#      differences per user (negative = stricter than the community).
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?userId (COUNT(?r) AS ?ratings)
+       (ROUND(AVG(?value) * 100) / 100 AS ?ownAvg)
+       (ROUND(AVG(?value - ?movieAvg) * 100) / 100 AS ?avgDeviation)
+WHERE {
+  {
+    SELECT ?movie (AVG(?v) AS ?movieAvg) WHERE {
+      ?x a mlo:Rating ; mlo:concernsMovie ?movie ; mlo:ratingValue ?v .
+    } GROUP BY ?movie
+  }
+  ?r a mlo:Rating ;
+     mlo:concernsMovie ?movie ;
+     mlo:ratingValue ?value ;
+     mlo:performedBy ?user .
+  ?user mlo:movieLensId ?userId .
+}
+GROUP BY ?userId
+ORDER BY ?avgDeviation

@@ -1,0 +1,14 @@
+-----------------------------------------------------------------------------------------------------------------------
+| title                                           | matchingGenres | viaGenres                         | communityAvg |
+=======================================================================================================================
+| "Inception"                                     | 4              | "Sci-Fi, Action, Drama, Thriller" | 3.58         |
+| "Léon: The Professional"                        | 3              | "Action, Drama, Thriller"         | 4.5          |
+| "Fight Club"                                    | 3              | "Action, Drama, Thriller"         | 4.42         |
+| "Donnie Darko"                                  | 3              | "Sci-Fi, Drama, Thriller"         | 4.2          |
+| "The Lord of the Rings: The Return of the King" | 3              | "Adventure, Action, Drama"        | 3.43         |
+| "Eternal Sunshine of the Spotless Mind"         | 2              | "Sci-Fi, Drama"                   | 4.0          |
+| "The Departed"                                  | 2              | "Drama, Thriller"                 | 3.83         |
+| "Reservoir Dogs"                                | 1              | "Thriller"                        | 4.1          |
+| "Catch Me If You Can"                           | 1              | "Drama"                           | 4.0          |
+| "Memento"                                       | 1              | "Thriller"                        | 4.0          |
+-----------------------------------------------------------------------------------------------------------------------

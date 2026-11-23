@@ -1,0 +1,17 @@
+# CQ2: What is the average rating of each genre, and how many movies
+#      and ratings does each genre have?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?genre (COUNT(DISTINCT ?movie) AS ?movies) (COUNT(?rating) AS ?ratings)
+       (ROUND(AVG(?value) * 100) / 100 AS ?avgRating)
+WHERE {
+  ?rating a mlo:Rating ;
+          mlo:concernsMovie ?movie ;
+          mlo:ratingValue ?value .
+  ?movie mlo:hasGenre ?g .
+  ?g rdfs:label ?genre .
+}
+GROUP BY ?genre
+ORDER BY DESC(?avgRating)

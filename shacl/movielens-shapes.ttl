@@ -1,0 +1,164 @@
+@prefix mlo:  <http://example.org/movielens/ontology#> .
+@prefix mls:  <http://example.org/movielens/shapes#> .
+@prefix sh:   <http://www.w3.org/ns/shacl#> .
+@prefix rdf:  <http://www.w3.org/1999/02/22-rdf-syntax-ns#> .
+@prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
+@prefix owl:  <http://www.w3.org/2002/07/owl#> .
+@prefix xsd:  <http://www.w3.org/2001/XMLSchema#> .
+
+# =============================================================================
+#  SHACL shapes for the MovieLens knowledge graph
+#  The ontology (OWL, open-world) says what the terms MEAN and lets a reasoner
+#  infer new facts; these shapes (closed-world) say what a COMPLETE and CLEAN
+#  record must look like before it is loaded into the graph.
+# =============================================================================
+
+mls:prefixes
+    sh:declare [ sh:prefix "mlo" ; sh:namespace "http://example.org/movielens/ontology#"^^xsd:anyURI ] ,
+               [ sh:prefix "xsd" ; sh:namespace "http://www.w3.org/2001/XMLSchema#"^^xsd:anyURI ] .
+
+# -----------------------------------------------------------------------------
+# 1) MovieShape - completeness and format of a movie record
+# -----------------------------------------------------------------------------
+mls:MovieShape a sh:NodeShape ;
+    sh:targetClass mlo:Movie ;
+    rdfs:comment "Every movie has exactly one non-empty title, a plausible release year, a well-formed IMDb identifier, at least one genre and at least one director."@en ;
+    sh:property [
+        sh:path mlo:title ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 1 ;
+        sh:message "A movie must have exactly one non-empty title."@en ;
+    ] , [
+        sh:path mlo:releaseYear ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 1888 ;          # first surviving motion picture
+        sh:maxInclusive 2026 ;
+        sh:message "Release year must be a single integer between 1888 and 2026."@en ;
+    ] , [
+        sh:path mlo:imdbId ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:pattern "^tt[0-9]{7,8}$" ;
+        sh:message "IMDb ID must look like 'tt' followed by 7-8 digits."@en ;
+    ] , [
+        sh:path mlo:hasGenre ;
+        sh:minCount 1 ;
+        sh:class mlo:Genre ;
+        sh:message "A movie must have at least one genre that is a mlo:Genre."@en ;
+    ] , [
+        sh:path mlo:directedBy ;
+        sh:minCount 1 ;
+        sh:class mlo:Director ;
+        sh:message "A movie must have at least one director typed as mlo:Director."@en ;
+    ] , [
+        sh:path mlo:runtimeMinutes ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:integer ;
+        sh:minInclusive 40 ;            # feature-film threshold (AMPAS / BFI)
+        sh:message "Runtime of a feature film must be at least 40 minutes."@en ;
+    ] .
+
+# -----------------------------------------------------------------------------
+# 2) RatingShape - a rating is complete, uses the MovieLens star scale and is
+#    not given before the movie was released
+# -----------------------------------------------------------------------------
+mls:RatingShape a sh:NodeShape ;
+    sh:targetClass mlo:Rating ;
+    rdfs:comment "Each rating has exactly one user, one movie, one timestamp and one value from the half-star scale 0.5-5.0; it cannot pre-date the movie's release year."@en ;
+    sh:property [
+        sh:path mlo:ratingValue ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:decimal ;
+        sh:in ( 0.5 1.0 1.5 2.0 2.5 3.0 3.5 4.0 4.5 5.0 ) ;
+        sh:message "Rating value must be one of 0.5, 1.0, ..., 5.0 (half-star steps)."@en ;
+    ] , [
+        sh:path mlo:performedBy ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mlo:User ;
+        sh:message "A rating must be made by exactly one known user."@en ;
+    ] , [
+        sh:path mlo:concernsMovie ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:class mlo:Movie ;
+        sh:message "A rating must concern exactly one known movie."@en ;
+    ] , [
+        sh:path mlo:createdAt ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:dateTime ;
+        sh:message "A rating must have exactly one xsd:dateTime timestamp."@en ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Rating {$this} was created in {?ratedYear}, before the movie was released ({?releaseYear})."@en ;
+        sh:prefixes mls:prefixes ;
+        sh:select """
+            SELECT $this ?ratedYear ?releaseYear WHERE {
+                $this mlo:createdAt ?when ;
+                      mlo:concernsMovie/mlo:releaseYear ?releaseYear .
+                BIND (YEAR(?when) AS ?ratedYear)
+                FILTER (?ratedYear < ?releaseYear)
+            }""" ;
+    ] .
+
+# -----------------------------------------------------------------------------
+# 3) OneRatingPerMovieShape - a user rates a given movie at most once
+# -----------------------------------------------------------------------------
+mls:OneRatingPerMovieShape a sh:NodeShape ;
+    sh:targetClass mlo:User ;
+    rdfs:comment "A user may rate each movie at most once (MovieLens keeps only the latest rating)."@en ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "User {$this} rated movie {?movie} {?n} times; only one rating per movie is allowed."@en ;
+        sh:prefixes mls:prefixes ;
+        sh:select """
+            SELECT $this ?movie (COUNT(DISTINCT ?r) AS ?n) WHERE {
+                ?r a mlo:Rating ;
+                   mlo:performedBy $this ;
+                   mlo:concernsMovie ?movie .
+            }
+            GROUP BY $this ?movie
+            HAVING (COUNT(DISTINCT ?r) > 1)""" ;
+    ] .
+
+# -----------------------------------------------------------------------------
+# 4) DirectorShape - a director record is complete and chronologically sane
+# -----------------------------------------------------------------------------
+mls:DirectorShape a sh:NodeShape ;
+    sh:targetClass mlo:Director ;
+    rdfs:comment "A director has exactly one name, at most one birth date, citizenships that are mlo:Country, directs at least one movie, and is at least 15 years old when any of their movies is released."@en ;
+    sh:property [
+        sh:path mlo:name ;
+        sh:minCount 1 ; sh:maxCount 1 ;
+        sh:datatype xsd:string ;
+        sh:minLength 2 ;
+        sh:message "A director must have exactly one name."@en ;
+    ] , [
+        sh:path mlo:birthDate ;
+        sh:maxCount 1 ;
+        sh:datatype xsd:date ;
+        sh:message "Birth date, if present, must be a single xsd:date."@en ;
+    ] , [
+        sh:path mlo:citizenOf ;
+        sh:class mlo:Country ;
+        sh:message "Citizenship must point to a mlo:Country."@en ;
+    ] , [
+        sh:path [ sh:inversePath mlo:directedBy ] ;   # movies pointing to this director
+        sh:minCount 1 ;
+        sh:class mlo:Movie ;
+        sh:message "A director must have directed at least one movie in the graph."@en ;
+    ] ;
+    sh:sparql [
+        a sh:SPARQLConstraint ;
+        sh:message "Director {$this} would have been only {?age} years old when {?movie} was released in {?year}."@en ;
+        sh:prefixes mls:prefixes ;
+        sh:select """
+            SELECT $this ?movie ?year ?age WHERE {
+                $this mlo:birthDate ?birth .
+                ?movie mlo:directedBy $this ;
+                       mlo:releaseYear ?year .
+                BIND (?year - YEAR(?birth) AS ?age)
+                FILTER (?age < 15)
+            }""" ;
+    ] .

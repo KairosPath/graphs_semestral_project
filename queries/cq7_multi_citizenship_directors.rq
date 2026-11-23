@@ -1,0 +1,20 @@
+# CQ7: Which directors hold the citizenship of more than one country,
+#      and which movies in the graph did they direct?
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?director ?born
+       (GROUP_CONCAT(DISTINCT ?country; separator=", ") AS ?citizenships)
+       (GROUP_CONCAT(DISTINCT ?title; separator=" | ") AS ?movies)
+WHERE {
+  ?d a mlo:Director ;
+     mlo:name ?director ;
+     mlo:birthDate ?born ;
+     mlo:citizenOf ?c .
+  ?movie mlo:directedBy ?d ; mlo:title ?title .
+  ?c rdfs:label ?country .
+}
+GROUP BY ?d ?director ?born
+HAVING (COUNT(DISTINCT ?c) > 1)
+ORDER BY ?born

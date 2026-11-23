@@ -1,0 +1,29 @@
+# Deliberately broken records used to demonstrate that the SHACL shapes work.
+# NOTE: every one of these records is CONSISTENT with the OWL ontology
+# (an OWL reasoner reports no error) - only SHACL catches them.
+@prefix mlo: <http://example.org/movielens/ontology#> .
+@prefix mlr: <http://example.org/movielens/resource/> .
+@prefix xsd: <http://www.w3.org/2001/XMLSchema#> .
+
+# MovieShape: no title, malformed IMDb ID, year out of range, no genre, no director
+mlr:movie-bad a mlo:Movie ;
+    mlo:imdbId "0114709" ;
+    mlo:releaseYear 1850 .
+
+# RatingShape: value off the half-star scale, missing user, rated before release
+mlr:rating-bad a mlo:Rating ;
+    mlo:concernsMovie mlr:movie-79132 ;              # Inception (2010)
+    mlo:ratingValue 4.2 ;
+    mlo:createdAt "2005-06-01T12:00:00Z"^^xsd:dateTime .
+
+# OneRatingPerMovieShape: user 57 rates Twelve Monkeys a second time
+mlr:rating-57-32-dup a mlo:Rating ;
+    mlo:performedBy mlr:user-57 ;
+    mlo:concernsMovie mlr:movie-32 ;
+    mlo:ratingValue 1.0 ;
+    mlo:createdAt "2019-01-01T00:00:00Z"^^xsd:dateTime .
+
+# DirectorShape: born after the movie was released, no name
+mlr:person-bad a mlo:Director ;
+    mlo:birthDate "2001-01-01"^^xsd:date .
+mlr:movie-356 mlo:directedBy mlr:person-bad .        # Forrest Gump (1994)

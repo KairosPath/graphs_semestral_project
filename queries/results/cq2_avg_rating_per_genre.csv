@@ -1,0 +1,14 @@
+genre,movies,ratings,avgRating
+Comedy,2,20,4.2
+Romance,2,16,4.13
+Crime,7,37,4.11
+Thriller,11,59,4.05
+Horror,3,16,4.03
+Drama,14,84,4.01
+War,2,16,3.97
+Mystery,6,35,3.96
+Adventure,7,46,3.96
+Action,13,79,3.94
+Sci-Fi,11,63,3.92
+IMAX,1,6,3.58
+Fantasy,1,7,3.43

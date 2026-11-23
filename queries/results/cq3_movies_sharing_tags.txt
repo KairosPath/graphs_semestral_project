@@ -1,0 +1,15 @@
+--------------------------------------------------------------------------------------
+| otherTitle                              | sharedTags | tags                        |
+======================================================================================
+| "Aliens"                                | 2          | "action, sci-fi"            |
+| "Fight Club"                            | 2          | "thought-provoking, action" |
+| "The Terminator"                        | 2          | "action, sci-fi"            |
+| "2001: A Space Odyssey"                 | 1          | "sci-fi"                    |
+| "Blade Runner"                          | 1          | "sci-fi"                    |
+| "Donnie Darko"                          | 1          | "thought-provoking"         |
+| "Eternal Sunshine of the Spotless Mind" | 1          | "thought-provoking"         |
+| "Léon: The Professional"                | 1          | "action"                    |
+| "Pulp Fiction"                          | 1          | "action"                    |
+| "Star Wars: Episode IV - A New Hope"    | 1          | "sci-fi"                    |
+| "Terminator 2: Judgment Day"            | 1          | "sci-fi"                    |
+--------------------------------------------------------------------------------------

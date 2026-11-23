@@ -1,0 +1,21 @@
+# A2 (COUNT, GROUP BY, string filter): Which descriptive tags are used on
+#      several movies, by how many users, and on which movies?  Only
+#      multi-word / hyphenated tags or tags longer than 6 characters are
+#      kept, which filters out one-word genre echoes such as "action".
+PREFIX mlo:  <http://example.org/movielens/ontology#>
+PREFIX mlr:  <http://example.org/movielens/resource/>
+PREFIX rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+
+SELECT ?tag (COUNT(DISTINCT ?movie) AS ?movies) (COUNT(DISTINCT ?user) AS ?users)
+       (GROUP_CONCAT(DISTINCT ?title; separator=" | ") AS ?titles)
+WHERE {
+  ?a a mlo:TagAssignment ;
+     mlo:usesTag/mlo:tagLabel ?tag ;
+     mlo:performedBy ?user ;
+     mlo:concernsMovie ?movie .
+  ?movie mlo:title ?title .
+  FILTER (CONTAINS(?tag, " ") || CONTAINS(?tag, "-") || STRLEN(?tag) > 6)
+}
+GROUP BY ?tag
+HAVING (COUNT(DISTINCT ?movie) >= 2)
+ORDER BY DESC(?movies) ?tag
