@@ -1,7 +1,7 @@
 # MovieLens Knowledge Graph
 
 Semestral project for 4IZ444 Graph-based and relational data (VŠE, winter semester 2026).
-Rostislav and Vojta Pardubský.
+Rostislav Sidenko and Vojta Pardubský.
 
 We took a small part of the [MovieLens](https://grouplens.org/datasets/movielens/latest/) dataset
 (movies, ratings, tags), turned it into an RDF knowledge graph and added directors, countries and
