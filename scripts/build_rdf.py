@@ -113,7 +113,7 @@ for uri, d in directors.items():
     g.add((n, RDF.type, MLO.Director))
     g.add((n, MLO.name, Literal(d["name"])))
     if d["birth"]:
-        g.add((n, MLO.birthDate, Literal(d["birth"][:10], datatype=XSD.date)))
+        g.add((n, MLO.birthDate, Literal(d["birth"][:10] + "T00:00:00Z", datatype=XSD.dateTime)))
     for c in sorted(d["citizen"]):
         g.add((n, MLO.citizenOf, country_node(c)))
     g.add((n, OWL.sameAs, URIRef(uri)))
@@ -145,6 +145,7 @@ for m in movies.itertuples(index=False):
         g.add((node, MLO.originalLanguage, language_node(lang)))
     for d in sorted(film_directors[imdb]):
         g.add((node, MLO.directedBy, MLR[f"person-{qid(d)}"]))
+        g.add((MLR[f"person-{qid(d)}"], MLO.directed, node))
 
 # ---- Users, ratings, tags ---------------------------------------------------
 for uid in sorted(set(ratings.userId) | set(tags.userId)):

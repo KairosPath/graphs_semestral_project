@@ -428,117 +428,142 @@ mlr:genre-war a mlo:Genre ;
 # ============================================================================
 
 mlr:person-Q119348 a mlo:Director ;
-    mlo:birthDate "1923-04-29"^^xsd:date ;
+    mlo:birthDate "1923-04-29T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-1196 ;
     mlo:name "Irvin Kershner" ;
     owl:sameAs wd:Q119348 .
 
 mlr:person-Q126098 a mlo:Director ;
-    mlo:birthDate "1963-05-08"^^xsd:date ;
+    mlo:birthDate "1963-05-08T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-fr ;
+    mlo:directed mlr:movie-7361 ;
     mlo:name "Michel Gondry" ;
     owl:sameAs wd:Q126098 .
 
 mlr:person-Q184903 a mlo:Director ;
-    mlo:birthDate "1962-08-28"^^xsd:date ;
+    mlo:birthDate "1962-08-28T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-2959 ;
     mlo:name "David Fincher" ;
     owl:sameAs wd:Q184903 .
 
 mlr:person-Q187364 a mlo:Director ;
-    mlo:birthDate "1952-05-14"^^xsd:date ;
+    mlo:birthDate "1952-05-14T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-356 ;
     mlo:name "Robert Zemeckis" ;
     owl:sameAs wd:Q187364 .
 
 mlr:person-Q2001 a mlo:Director ;
-    mlo:birthDate "1928-07-26"^^xsd:date ;
+    mlo:birthDate "1928-07-26T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-gb,
         mlr:country-us ;
+    mlo:directed mlr:movie-1258,
+        mlr:movie-924 ;
     mlo:name "Stanley Kubrick" ;
     owl:sameAs wd:Q2001 .
 
 mlr:person-Q25078 a mlo:Director ;
-    mlo:birthDate "1940-11-22"^^xsd:date ;
+    mlo:birthDate "1940-11-22T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-gb,
         mlr:country-us ;
+    mlo:directed mlr:movie-32 ;
     mlo:name "Terry Gilliam" ;
     owl:sameAs wd:Q25078 .
 
 mlr:person-Q25191 a mlo:Director ;
-    mlo:birthDate "1970-07-30"^^xsd:date ;
+    mlo:birthDate "1970-07-30T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-gb,
         mlr:country-us ;
+    mlo:directed mlr:movie-4226,
+        mlr:movie-79132 ;
     mlo:name "Christopher Nolan" ;
     owl:sameAs wd:Q25191 .
 
 mlr:person-Q3772 a mlo:Director ;
-    mlo:birthDate "1963-03-27"^^xsd:date ;
+    mlo:birthDate "1963-03-27T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-1089,
+        mlr:movie-296 ;
     mlo:name "Quentin Tarantino" ;
     owl:sameAs wd:Q3772 .
 
 mlr:person-Q38222 a mlo:Director ;
-    mlo:birthDate "1944-05-14"^^xsd:date ;
+    mlo:birthDate "1944-05-14T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-260 ;
     mlo:name "George Lucas" ;
     owl:sameAs wd:Q38222 .
 
 mlr:person-Q41148 a mlo:Director ;
-    mlo:birthDate "1942-11-17"^^xsd:date ;
+    mlo:birthDate "1942-11-17T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-it,
         mlr:country-us ;
+    mlo:directed mlr:movie-48516 ;
     mlo:name "Martin Scorsese" ;
     owl:sameAs wd:Q41148 .
 
 mlr:person-Q42229 a mlo:Director ;
-    mlo:birthDate "1956-01-03"^^xsd:date ;
+    mlo:birthDate "1956-01-03T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-ie,
         mlr:country-us ;
+    mlo:directed mlr:movie-110 ;
     mlo:name "Mel Gibson" ;
     owl:sameAs wd:Q42229 .
 
 mlr:person-Q42574 a mlo:Director ;
-    mlo:birthDate "1954-08-16"^^xsd:date ;
+    mlo:birthDate "1954-08-16T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-ca,
         mlr:country-nz ;
+    mlo:directed mlr:movie-1200,
+        mlr:movie-1240,
+        mlr:movie-589 ;
     mlo:name "James Cameron" ;
     owl:sameAs wd:Q42574 .
 
 mlr:person-Q4465 a mlo:Director ;
-    mlo:birthDate "1961-10-31"^^xsd:date ;
+    mlo:birthDate "1961-10-31T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-nz ;
+    mlo:directed mlr:movie-7153 ;
     mlo:name "Peter Jackson" ;
     owl:sameAs wd:Q4465 .
 
 mlr:person-Q484779 a mlo:Director ;
-    mlo:birthDate "1959-03-18"^^xsd:date ;
+    mlo:birthDate "1959-03-18T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-fr ;
+    mlo:directed mlr:movie-293 ;
     mlo:name "Luc Besson" ;
     owl:sameAs wd:Q484779 .
 
 mlr:person-Q51489 a mlo:Director ;
-    mlo:birthDate "1970-08-06"^^xsd:date ;
+    mlo:birthDate "1970-08-06T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-in,
         mlr:country-us ;
+    mlo:directed mlr:movie-2762 ;
     mlo:name "M. Night Shyamalan" ;
     owl:sameAs wd:Q51489 .
 
 mlr:person-Q56005 a mlo:Director ;
-    mlo:birthDate "1937-11-30"^^xsd:date ;
+    mlo:birthDate "1937-11-30T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-gb ;
+    mlo:directed mlr:movie-3578,
+        mlr:movie-541 ;
     mlo:name "Ridley Scott" ;
     owl:sameAs wd:Q56005 .
 
 mlr:person-Q711022 a mlo:Director ;
-    mlo:birthDate "1975-03-28"^^xsd:date ;
+    mlo:birthDate "1975-03-28T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-4878 ;
     mlo:name "Richard Kelly" ;
     owl:sameAs wd:Q711022 .
 
 mlr:person-Q8877 a mlo:Director ;
-    mlo:birthDate "1946-12-18"^^xsd:date ;
+    mlo:birthDate "1946-12-18T00:00:00+00:00"^^xsd:dateTime ;
     mlo:citizenOf mlr:country-us ;
+    mlo:directed mlr:movie-1198,
+        mlr:movie-5989 ;
     mlo:name "Steven Spielberg" ;
     owl:sameAs wd:Q8877 .
 

@@ -11,12 +11,30 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
 [ rdf:type     sh:ValidationReport;
   sh:conforms  false;
   sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:person-bad;
-                 sh:resultMessage              "A director must have exactly one name."@en;
-                 sh:resultPath                 mlo:name;
+                 sh:focusNode                  mlr:user-57;
+                 sh:resultMessage              "User <http://example.org/movielens/resource/user-57> rated movie <http://example.org/movielens/resource/movie-32> 2 times; only one rating per movie is allowed.";
+                 sh:resultSeverity             sh:Violation;
+                 sh:sourceConstraint           mls:OneRatingPerMovieShape;
+                 sh:sourceConstraintComponent  sh:SPARQLConstraintComponent;
+                 sh:sourceShape                mls:OneRatingPerMovieShape;
+                 sh:value                      mlr:user-57
+               ];
+  sh:result    [ rdf:type                      sh:ValidationResult;
+                 sh:focusNode                  mlr:movie-bad;
+                 sh:resultMessage              "A movie must have at least one director typed as mlo:Director."@en;
+                 sh:resultPath                 mlo:directedBy;
                  sh:resultSeverity             sh:Violation;
                  sh:sourceConstraintComponent  sh:MinCountConstraintComponent;
                  sh:sourceShape                [] 
+               ];
+  sh:result    [ rdf:type                      sh:ValidationResult;
+                 sh:focusNode                  mlr:movie-bad;
+                 sh:resultMessage              "Release year must be a single integer between 1888 and 2026."@en;
+                 sh:resultPath                 mlo:releaseYear;
+                 sh:resultSeverity             sh:Violation;
+                 sh:sourceConstraintComponent  sh:MinInclusiveConstraintComponent;
+                 sh:sourceShape                [] ;
+                 sh:value                      1850
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
                  sh:focusNode                  mlr:rating-bad;
@@ -37,30 +55,13 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
                  sh:value                      "0114709"
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:person-bad;
-                 sh:resultMessage              "Director <http://example.org/movielens/resource/person-bad> would have been only -7 years old when <http://example.org/movielens/resource/movie-356> was released in 1994.";
+                 sh:focusNode                  mlr:rating-bad;
+                 sh:resultMessage              "Rating <http://example.org/movielens/resource/rating-bad> was created in 2005, before the movie was released (2010).";
                  sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraint           mls:DirectorShape;
+                 sh:sourceConstraint           mls:RatingShape;
                  sh:sourceConstraintComponent  sh:SPARQLConstraintComponent;
-                 sh:sourceShape                mls:DirectorShape;
-                 sh:value                      mlr:person-bad
-               ];
-  sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:movie-bad;
-                 sh:resultMessage              "Release year must be a single integer between 1888 and 2026."@en;
-                 sh:resultPath                 mlo:releaseYear;
-                 sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraintComponent  sh:MinInclusiveConstraintComponent;
-                 sh:sourceShape                [] ;
-                 sh:value                      1850
-               ];
-  sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:movie-bad;
-                 sh:resultMessage              "A movie must have at least one genre that is a mlo:Genre."@en;
-                 sh:resultPath                 mlo:hasGenre;
-                 sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent;
-                 sh:sourceShape                [] 
+                 sh:sourceShape                mls:RatingShape;
+                 sh:value                      mlr:rating-bad
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
                  sh:focusNode                  mlr:movie-bad;
@@ -71,21 +72,13 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
                  sh:sourceShape                [] 
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:user-57;
-                 sh:resultMessage              "User <http://example.org/movielens/resource/user-57> rated movie <http://example.org/movielens/resource/movie-32> 2 times; only one rating per movie is allowed.";
+                 sh:focusNode                  mlr:person-bad;
+                 sh:resultMessage              "Director <http://example.org/movielens/resource/person-bad> would have been only -7 years old when <http://example.org/movielens/resource/movie-356> was released in 1994.";
                  sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraint           mls:OneRatingPerMovieShape;
+                 sh:sourceConstraint           mls:DirectorShape;
                  sh:sourceConstraintComponent  sh:SPARQLConstraintComponent;
-                 sh:sourceShape                mls:OneRatingPerMovieShape;
-                 sh:value                      mlr:user-57
-               ];
-  sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:movie-bad;
-                 sh:resultMessage              "A movie must have at least one director typed as mlo:Director."@en;
-                 sh:resultPath                 mlo:directedBy;
-                 sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent;
-                 sh:sourceShape                [] 
+                 sh:sourceShape                mls:DirectorShape;
+                 sh:value                      mlr:person-bad
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
                  sh:focusNode                  mlr:rating-bad;
@@ -96,12 +89,19 @@ PREFIX xsd:  <http://www.w3.org/2001/XMLSchema#>
                  sh:sourceShape                [] 
                ];
   sh:result    [ rdf:type                      sh:ValidationResult;
-                 sh:focusNode                  mlr:rating-bad;
-                 sh:resultMessage              "Rating <http://example.org/movielens/resource/rating-bad> was created in 2005, before the movie was released (2010).";
+                 sh:focusNode                  mlr:person-bad;
+                 sh:resultMessage              "A director must have exactly one name."@en;
+                 sh:resultPath                 mlo:name;
                  sh:resultSeverity             sh:Violation;
-                 sh:sourceConstraint           mls:RatingShape;
-                 sh:sourceConstraintComponent  sh:SPARQLConstraintComponent;
-                 sh:sourceShape                mls:RatingShape;
-                 sh:value                      mlr:rating-bad
+                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent;
+                 sh:sourceShape                [] 
+               ];
+  sh:result    [ rdf:type                      sh:ValidationResult;
+                 sh:focusNode                  mlr:movie-bad;
+                 sh:resultMessage              "A movie must have at least one genre that is a mlo:Genre."@en;
+                 sh:resultPath                 mlo:hasGenre;
+                 sh:resultSeverity             sh:Violation;
+                 sh:sourceConstraintComponent  sh:MinCountConstraintComponent;
+                 sh:sourceShape                [] 
                ]
 ] .

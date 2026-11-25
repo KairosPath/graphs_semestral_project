@@ -137,14 +137,14 @@ mls:DirectorShape a sh:NodeShape ;
     ] , [
         sh:path mlo:birthDate ;
         sh:maxCount 1 ;
-        sh:datatype xsd:date ;
-        sh:message "Birth date, if present, must be a single xsd:date."@en ;
+        sh:datatype xsd:dateTime ;
+        sh:message "Birth date, if present, must be a single xsd:dateTime."@en ;
     ] , [
         sh:path mlo:citizenOf ;
         sh:class mlo:Country ;
         sh:message "Citizenship must point to a mlo:Country."@en ;
     ] , [
-        sh:path [ sh:inversePath mlo:directedBy ] ;   # movies pointing to this director
+        sh:path mlo:directed ;
         sh:minCount 1 ;
         sh:class mlo:Movie ;
         sh:message "A director must have directed at least one movie in the graph."@en ;
@@ -155,9 +155,9 @@ mls:DirectorShape a sh:NodeShape ;
         sh:prefixes mls:prefixes ;
         sh:select """
             SELECT $this ?movie ?year ?age WHERE {
-                $this mlo:birthDate ?birth .
-                ?movie mlo:directedBy $this ;
-                       mlo:releaseYear ?year .
+                $this mlo:birthDate ?birth ;
+                      mlo:directed ?movie .
+                ?movie mlo:releaseYear ?year .
                 BIND (?year - YEAR(?birth) AS ?age)
                 FILTER (?age < 15)
             }""" ;

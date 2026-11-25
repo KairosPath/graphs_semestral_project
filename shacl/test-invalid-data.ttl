@@ -25,5 +25,5 @@ mlr:rating-57-32-dup a mlo:Rating ;
 
 # DirectorShape: born after the movie was released, no name
 mlr:person-bad a mlo:Director ;
-    mlo:birthDate "2001-01-01"^^xsd:date .
-mlr:movie-356 mlo:directedBy mlr:person-bad .        # Forrest Gump (1994)
+    mlo:birthDate "2001-01-01T00:00:00Z"^^xsd:dateTime ;
+    mlo:directed mlr:movie-356 .                     # Forrest Gump (1994)

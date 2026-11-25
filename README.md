@@ -16,7 +16,7 @@ to check the data.
 | Folder | What's inside |
 |---|---|
 | `ontology/` | the ontology in Turtle (11 classes, 20 properties) |
-| `data/` | the knowledge graph, 1,718 triples |
+| `data/` | the knowledge graph, 1,743 triples |
 | `queries/` | 8 queries for the competency questions (`cq1`–`cq8`) and 3 extra ones (`a1`–`a3`), results in `queries/results/` |
 | `shacl/` | 4 SHACL shapes, a file with broken test data and the validation reports |
 | `scripts/` | Python scripts that build the graph from the CSV files |
@@ -25,13 +25,14 @@ to check the data.
 
 ## Running it
 
-You need Python 3 with `pandas rdflib pyshacl owlrl requests`, and Java with
+You need Python 3 with `pandas rdflib pyshacl owlrl owlready2 requests`, and Java with
 [Apache Jena](https://jena.apache.org/download/) if you want to run the queries the same way we did.
 
-Rebuild the graph from `subset/` and check it with the reasoner:
+Rebuild the graph from `subset/` and check it with the reasoners (HermiT and OWL RL):
 
 ```
 python scripts/build_rdf.py subset data/movielens-data.ttl
+python scripts/check_hermit.py ontology/movielens-ontology.ttl data/movielens-data.ttl
 python scripts/check_consistency.py ontology/movielens-ontology.ttl data/movielens-data.ttl
 ```
 

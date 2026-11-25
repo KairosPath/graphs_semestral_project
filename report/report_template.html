@@ -109,7 +109,7 @@ figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
 <text x="36" y="540">rdfs:label</text><text x="220" y="540">isoCode : string</text><text x="220" y="556">rdfs:label</text>
 <text x="404" y="540">isoCode : string</text><text x="404" y="556">rdfs:label</text>
 <text x="578" y="540">≡ Person ⊓</text><text x="578" y="556">∃directed.Movie</text>
-<text x="578" y="660">name : string</text><text x="578" y="676">birthDate : date</text>
+<text x="578" y="660">name : string</text><text x="578" y="676">birthDate : dateTime</text>
 </g>
 <g font-size="11.5" fill="#444">
 <path d="M24 724H60" stroke="#333" stroke-width="1.2" marker-end="url(#ar)"/><text x="68" y="728">object property</text>
@@ -140,7 +140,7 @@ figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
 <table>
 <tr><th style="width:24%">Property</th><th style="width:38%">From → to</th><th>Note</th></tr>
 <tr><td><code>hasGenre</code></td><td>Movie → Genre</td><td></td></tr>
-<tr><td><code>directedBy</code> / <code>directed</code></td><td>Movie → Director / Person → Movie</td><td>inverse pair, only <code>directedBy</code> is stored</td></tr>
+<tr><td><code>directedBy</code> / <code>directed</code></td><td>Movie → Director / Person → Movie</td><td>inverse pair, both are stored</td></tr>
 <tr><td><code>countryOfOrigin</code></td><td>Movie → Country</td><td></td></tr>
 <tr><td><code>originalLanguage</code></td><td>Movie → Language</td><td></td></tr>
 <tr><td><code>citizenOf</code></td><td>Person → Country</td><td></td></tr>
@@ -152,7 +152,7 @@ figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
 <tr><td><code>ratingValue</code></td><td>Rating → decimal</td><td>functional</td></tr>
 <tr><td><code>createdAt</code></td><td>UserActivity → dateTime</td><td>functional</td></tr>
 <tr><td><code>tagLabel</code></td><td>Tag → string</td><td>functional</td></tr>
-<tr><td><code>name</code>, <code>birthDate</code></td><td>Person → string / date</td><td></td></tr>
+<tr><td><code>name</code>, <code>birthDate</code></td><td>Person → string / dateTime</td><td></td></tr>
 <tr><td><code>isoCode</code></td><td>Country or Language → string</td><td>functional</td></tr>
 </table></div>
 
@@ -165,7 +165,7 @@ figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
 <li><code>directed</code> is the inverse of <code>directedBy</code>, <code>imdbId</code> is a key of <code>Movie</code> and the properties marked in table 2 are functional.</li>
 <li>Every movie has some genre, every rating has exactly one value and every tag assignment exactly one tag.</li>
 </ul>
-<p>We loaded the ontology together with the data into the OWL RL reasoner <code>owlrl</code> (Python). It found no inconsistency. To check that it really looks for errors, we also gave it something that is both a <code>Rating</code> and a <code>TagAssignment</code>, and it reported it.</p>
+<p>We checked the ontology together with the data with two reasoners: HermiT, the default reasoner in Protégé (through the Python library <code>owlready2</code>), and the OWL RL reasoner <code>owlrl</code>. Neither found an inconsistency and HermiT found no unsatisfiable classes. To make sure they really look for errors, we also gave them something that is both a <code>Rating</code> and a <code>TagAssignment</code>, and both reported it. One thing we learned here: HermiT does not accept the type <code>xsd:date</code>, because it is not in the OWL 2 datatype map, so birth dates are stored as <code>xsd:dateTime</code>.</p>
 
 <h3>Reuse of existing vocabularies</h3>
 <p>We searched <a href="https://lov.linkeddata.es/dataset/lov/terms?q=Movie">Linked Open Vocabularies</a> for movie, film, director, rating, genre and tagging. The most useful results were schema.org (<code>Movie</code>, <code>Person</code>, <code>director</code>, <code>genre</code>, <code>Rating</code>), FOAF, Dublin Core, SKOS, the DBpedia ontology (<code>dbo:Film</code>, <code>dbo:director</code>) and the Tag Ontology / MUTO for tagging.</p>
@@ -192,7 +192,7 @@ figcaption, .tcap { font-size: 9pt; color: #444; margin-top: 3pt; }
 </ul>
 <p>We chose users with a medium number of ratings on purpose. Someone who rated all 25 movies would leave nothing to recommend.</p>
 <p>Then one SPARQL query to Wikidata (<code>scripts/fetch_wikidata.py</code>) finds every movie by its IMDb ID and returns the director with birth date and citizenship, the countries of origin, the original languages and the runtime. All 25 movies were found. The last script (<code>scripts/build_rdf.py</code>) cleans the data and writes Turtle. For example "Terminator, The (1984)" becomes the title "The Terminator" and the year 1984, genres are split, tags are lower-cased and Unix timestamps become <code>xsd:dateTime</code>.</p>
-<p>The result, <code>data/movielens-data.ttl</code>, has 1,718 triples: 25 movies, 13 genres, 13 users, 148 ratings, 73 tag assignments with 35 different tags, 18 directors, 10 countries and 3 languages. Our first version had 40 movies and almost 3,700 triples. That was more than we needed, so we made it smaller and removed things that no query used. A short example:</p>
+<p>The result, <code>data/movielens-data.ttl</code>, has 1,743 triples: 25 movies, 13 genres, 13 users, 148 ratings, 73 tag assignments with 35 different tags, 18 directors, 10 countries and 3 languages. Our first version had 40 movies and almost 3,700 triples. That was more than we needed, so we made it smaller and removed things that no query used. Every class and every property of the ontology is still used in the data. A short example:</p>
 <pre>mlr:movie-79132 a mlo:Movie ;
     mlo:title "Inception" ;
     mlo:releaseYear 2010 ;
@@ -298,16 +298,15 @@ PREFIX rdfs: &lt;http://www.w3.org/2000/01/rdf-schema#&gt;</pre>
       ?r a mlo:Rating ; mlo:performedBy $this ; mlo:concernsMovie ?movie . }
     GROUP BY $this ?movie HAVING (COUNT(DISTINCT ?r) &gt; 1)""" ] .</pre>
 
-<p><b>DirectorShape</b> requires exactly one name, at most one birth date and at least one movie (through the inverse path of <code>directedBy</code>, because <code>directed</code> is not stored). The SPARQL constraint checks that the director was at least 15 when the movie came out.</p>
+<p><b>DirectorShape</b> requires exactly one name, at most one birth date and at least one movie. The SPARQL constraint checks that the director was at least 15 when the movie came out.</p>
 <pre>mls:DirectorShape a sh:NodeShape ; sh:targetClass mlo:Director ;
   sh:property [ sh:path mlo:name ; sh:minCount 1 ; sh:maxCount 1 ] ,
               [ sh:path mlo:birthDate ; sh:maxCount 1 ] ,
               [ sh:path mlo:citizenOf ; sh:class mlo:Country ] ,
-              [ sh:path [ sh:inversePath mlo:directedBy ] ;
-                sh:minCount 1 ; sh:class mlo:Movie ] ;
+              [ sh:path mlo:directed ; sh:minCount 1 ; sh:class mlo:Movie ] ;
   sh:sparql [ sh:select """SELECT $this WHERE {
-      $this mlo:birthDate ?birth .
-      ?movie mlo:directedBy $this ; mlo:releaseYear ?year .
+      $this mlo:birthDate ?birth ; mlo:directed ?movie .
+      ?movie mlo:releaseYear ?year .
       FILTER (?year - YEAR(?birth) &lt; 15) }""" ] .</pre>
 
 <p>Our data passes all four shapes, in Apache Jena and in pySHACL. To test the shapes we made a file with broken records (<code>shacl/test-invalid-data.ttl</code>): a movie without title, genre and director, with the year 1850 and a wrong IMDb ID; a rating of 4.2 without a user, given to <i>Inception</i> in 2005; a second rating of <i>Twelve Monkeys</i> by user 57; and a director without a name, born in 2001, who directed <i>Forrest Gump</i> (1994). SHACL found 11 errors. The OWL reasoner found none in the same data, which shows nicely that the two tools do different jobs.</p>

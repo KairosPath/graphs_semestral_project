@@ -1,11 +1,11 @@
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
-| director             | born                                                  | citizenships                    | movies                                                 |
-===========================================================================================================================================================================
-| "Stanley Kubrick"    | "1928-07-26"^^<http://www.w3.org/2001/XMLSchema#date> | "United Kingdom, United States" | "The Shining | 2001: A Space Odyssey"                  |
-| "Terry Gilliam"      | "1940-11-22"^^<http://www.w3.org/2001/XMLSchema#date> | "United Kingdom, United States" | "Twelve Monkeys"                                       |
-| "Martin Scorsese"    | "1942-11-17"^^<http://www.w3.org/2001/XMLSchema#date> | "United States, Italy"          | "The Departed"                                         |
-| "James Cameron"      | "1954-08-16"^^<http://www.w3.org/2001/XMLSchema#date> | "New Zealand, Canada"           | "The Terminator | Aliens | Terminator 2: Judgment Day" |
-| "Mel Gibson"         | "1956-01-03"^^<http://www.w3.org/2001/XMLSchema#date> | "United States, Ireland"        | "Braveheart"                                           |
-| "Christopher Nolan"  | "1970-07-30"^^<http://www.w3.org/2001/XMLSchema#date> | "United Kingdom, United States" | "Memento | Inception"                                  |
-| "M. Night Shyamalan" | "1970-08-06"^^<http://www.w3.org/2001/XMLSchema#date> | "India, United States"          | "The Sixth Sense"                                      |
----------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+| director             | born                                                                     | citizenships                    | movies                                                 |
+==============================================================================================================================================================================================
+| "Stanley Kubrick"    | "1928-07-26T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "United Kingdom, United States" | "The Shining | 2001: A Space Odyssey"                  |
+| "Terry Gilliam"      | "1940-11-22T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "United Kingdom, United States" | "Twelve Monkeys"                                       |
+| "Martin Scorsese"    | "1942-11-17T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "United States, Italy"          | "The Departed"                                         |
+| "James Cameron"      | "1954-08-16T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "New Zealand, Canada"           | "The Terminator | Aliens | Terminator 2: Judgment Day" |
+| "Mel Gibson"         | "1956-01-03T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "United States, Ireland"        | "Braveheart"                                           |
+| "Christopher Nolan"  | "1970-07-30T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "United Kingdom, United States" | "Memento | Inception"                                  |
+| "M. Night Shyamalan" | "1970-08-06T00:00:00+00:00"^^<http://www.w3.org/2001/XMLSchema#dateTime> | "India, United States"          | "The Sixth Sense"                                      |
+----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------

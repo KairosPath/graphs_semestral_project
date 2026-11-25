@@ -19,7 +19,7 @@
     dcterms:description """Ontology for a movie knowledge graph built from the MovieLens
 ml-latest-small dataset (movies, genres, users, ratings, tags) enriched with
 facts from Wikidata (directors, countries of origin, original languages)."""@en ;
-    dcterms:created "2026-11-21"^^xsd:date ;
+    dcterms:created "2026-11-21T00:00:00Z"^^xsd:dateTime ;
     dcterms:source <https://grouplens.org/datasets/movielens/latest/> , <https://www.wikidata.org/> ;
     owl:versionInfo "1.0" .
 
@@ -204,7 +204,7 @@ mlo:name a owl:DatatypeProperty ;
 mlo:birthDate a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:label "birth date"@en ;
     rdfs:domain mlo:Person ;
-    rdfs:range xsd:date .
+    rdfs:range xsd:dateTime .
 
 mlo:isoCode a owl:DatatypeProperty , owl:FunctionalProperty ;
     rdfs:label "ISO code"@en ;
